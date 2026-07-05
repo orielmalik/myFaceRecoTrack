@@ -1,24 +1,25 @@
 import cv2
 import numpy as np
 import base64
-import mediapipe as mp
-from Patterns.LoggerSingelton import printer
-
 
 class FaceEngine:
 
     def __init__(self):
+        import mediapipe as mp
         self.detector = mp.solutions.face_detection.FaceDetection(
             model_selection=0,
             min_detection_confidence=0.6
         )
 
     # -------------------------
-    # IMAGE DECODING
+    # DECODE BASE64 → IMAGE
     # -------------------------
     def _decode_image(self, image):
+
         if isinstance(image, str):
+
             try:
+                # אם זה data URL
                 if "," in image:
                     image = image.split(",")[1]
 
@@ -27,23 +28,28 @@ class FaceEngine:
                 image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
             except Exception as e:
-                printer("error", f"decode failed: {e}")
+                print("decode failed:", e)
                 return None
-
-        if image is None or not hasattr(image, "shape"):
-            return None
 
         return image
 
     # -------------------------
-    # FACE DETECTION ONLY
+    # MAIN PIPELINE
     # -------------------------
     def process_image(self, image):
+
+        # 🔥 חובה decode ראשון
         image = self._decode_image(image)
+
         if image is None:
             return []
 
+        if not isinstance(image, np.ndarray):
+            return []
+
+        # עכשיו זה בטוח
         rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
         results = self.detector.process(rgb)
 
         if not results.detections:
@@ -63,9 +69,8 @@ class FaceEngine:
             crop = image[y1:y2, x1:x2]
 
             faces.append({
-                "bbox": (x1, y1, x2, y2),
                 "crop": crop,
-                "confidence": float(det.score[0])
+                "bbox": (x1, y1, x2, y2)
             })
 
         return faces

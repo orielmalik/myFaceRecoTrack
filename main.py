@@ -5,6 +5,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from insightface.app import FaceAnalysis
 
+from Engine.FaceCore import FaceCore
 from Engine.FaceEngine import FaceEngine
 from Model.FaceModel import MatchResponse, FrameRequest
 
@@ -23,32 +24,27 @@ service = None
 pipeline = None
 
 register_exception_handlers(app)
-
-
 @app.on_event("startup")
 async def startup():
-    global engine, service, pipeline, face_app
 
-    printer("info", "🚀 Starting system...")
+    global engine, service, pipeline, face_app, face_core
 
-    # 1. CV engine (MediaPipe)
     engine = FaceEngine()
 
-    # 2. InsightFace (identity model)
     face_app = FaceAnalysis(
         name="buffalo_l",
         providers=["CPUExecutionProvider"]
     )
     face_app.prepare(ctx_id=0, det_size=(640, 640))
 
+    face_core = FaceCore(face_app)
+
     service = FaceService(
         APIClient(BASE_URL_DEV),
-        face_app
+        face_core
     )
-    pipeline = FacePipeline(engine, service)
-
-    printer("info", "✅ System ready")
-
+    pipeline = FacePipeline(engine, face_core, service)
+    printer("info", "System ready")
 
 # =========================
 # CORS
