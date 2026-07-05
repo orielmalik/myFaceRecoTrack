@@ -3,6 +3,7 @@ import time
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from insightface.app import FaceAnalysis
 
 from Engine.FaceEngine import FaceEngine
 from Model.FaceModel import MatchResponse, FrameRequest
@@ -17,7 +18,6 @@ from Utils.ApiClient import APIClient
 from Utils.Consts import *
 
 app = FastAPI(title="ASGARD Tracking System")
-
 engine = None
 service = None
 pipeline = None
@@ -25,28 +25,29 @@ pipeline = None
 register_exception_handlers(app)
 
 
-# =========================
-# STARTUP TIMER
-# =========================
 @app.on_event("startup")
 async def startup():
-    global engine, service, pipeline
+    global engine, service, pipeline, face_app
 
-    t0 = time.time()
     printer("info", "🚀 Starting system...")
 
+    # 1. CV engine (MediaPipe)
     engine = FaceEngine()
-    printer("info", f"FaceEngine loaded in {time.time() - t0:.3f}s")
 
-    t1 = time.time()
-    service = FaceService(APIClient(BASE_URL_DEV))
-    printer("info", f"FaceService loaded in {time.time() - t1:.3f}s")
+    # 2. InsightFace (identity model)
+    face_app = FaceAnalysis(
+        name="buffalo_l",
+        providers=["CPUExecutionProvider"]
+    )
+    face_app.prepare(ctx_id=0, det_size=(640, 640))
 
-    t2 = time.time()
+    service = FaceService(
+        APIClient(BASE_URL_DEV),
+        face_app
+    )
     pipeline = FacePipeline(engine, service)
-    printer("info", f"FacePipeline ready in {time.time() - t2:.3f}s")
 
-    printer("info", f"✅ TOTAL startup time: {time.time() - t0:.3f}s")
+    printer("info", "✅ System ready")
 
 
 # =========================
@@ -86,7 +87,6 @@ async def process_frame(req: FrameRequest):
 
     if not results:
         raise NotFoundError()
-
 
     return MatchResponse(
         matched=results[0].get("matched"),

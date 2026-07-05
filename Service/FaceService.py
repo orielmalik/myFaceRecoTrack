@@ -1,20 +1,39 @@
 from Model.FaceModel import DetectionWithPersonBoundary
-from Patterns.LoggerSingelton import printer
 from Utils.Consts import ENDPOINT_DEV
 
 
 class FaceService:
 
-    def __init__(self, api_client):
+    def __init__(self, api_client, face_app):
         self.api = api_client
+        self.face_app = face_app
 
-    def process_face(self, face_data):
-        embedding = face_data["embedding"]
-        person_name = face_data.get("person_name")
+    # -------------------------
+    # EMBEDDING (InsightFace)
+    # -------------------------
+    def get_embedding(self, crop):
+        if crop is None:
+            return None
+
+        try:
+            faces = self.face_app.get(crop)
+
+            if not faces:
+                return None
+
+            return faces[0].embedding
+
+        except Exception:
+            return None
+
+    # -------------------------
+    # IDENTITY (Spring Boot)
+    # -------------------------
+    def identify_face(self, embedding, person_name=None):
 
         dto = DetectionWithPersonBoundary(
             personName=person_name,
-            faceVector=embedding.tolist() if hasattr(embedding, "tolist") else embedding
+            faceVector=embedding.tolist()
         )
 
         response = self.api.post(

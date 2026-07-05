@@ -1,6 +1,5 @@
 from Patterns.LoggerSingelton import printer
 
-
 class FacePipeline:
 
     def __init__(self, engine, service):
@@ -8,23 +7,19 @@ class FacePipeline:
         self.service = service
 
     def run(self, req):
-        faces = self.engine.extract_faces(req.image)
-
+        faces = self.engine.process_image(req.image)
         results = []
-
         for face in faces:
-            embedding = self.engine.get_embedding(face["crop"])
-            if not embedding:
-                printer("info", "continiueNotEmbed")
+            embedding = self.service.get_embedding(face["crop"])
+
+            if embedding is None:
+                printer("info", "skip_no_embedding")
                 continue
 
-            result = self.service.process_face({
-                "embedding": embedding,
-                "confidence": face["confidence"],
-                "bbox": face["bbox"],
-                "person_name": req.name
-            })
-            printer("info", "results.append")
+            result = self.service.identify_face(
+                embedding=embedding,
+                person_name=req.name
+            )
 
             results.append(result)
 

@@ -1,6 +1,4 @@
 import numpy as np
-
-
 class MatcherService:
 
     def __init__(self):
