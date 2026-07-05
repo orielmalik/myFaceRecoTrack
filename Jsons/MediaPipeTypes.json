@@ -1,0 +1,9 @@
+{
+  "FACE_DETECTION": "face_detection",
+  "FACE_MESH": "face_mesh",
+  "POSE": "pose",
+  "HANDS": "hands",
+  "HOLISTIC": "holistic",
+  "SELFIE_SEGMENTATION": "selfie_segmentation",
+  "OBJECTRON": "objectron"
+}
