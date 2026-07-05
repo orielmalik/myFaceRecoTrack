@@ -1,6 +1,8 @@
 import httpx
 from typing import Any, Dict, Optional
 
+from Patterns.LoggerSingelton import printer
+
 
 class APIClient:
     def __init__(self, base_url: str, timeout: int = 10):
@@ -25,6 +27,7 @@ class APIClient:
                 headers=headers
             )
             response.raise_for_status()
+            printer("info", response.raise_for_status+" <-status")
             return response.json()
         except httpx.HTTPStatusError as e:
             return {"error": "http_error", "status_code": e.response.status_code, "details": e.response.text}

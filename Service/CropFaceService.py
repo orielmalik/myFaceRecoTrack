@@ -1,7 +1,6 @@
 class CropFaceService:
 
     def process(self, detections):
-
         faces = []
         for detection in detections:
 

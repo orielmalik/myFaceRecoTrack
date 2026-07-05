@@ -27,7 +27,6 @@ class MediaPipeService:
             return {"face_detected": False, "faces": []}
 
         h, w, _ = image.shape
-
         faces = []
 
         for det in results.detections:

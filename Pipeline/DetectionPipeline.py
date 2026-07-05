@@ -1,5 +1,4 @@
 class DetectionPipeline:
-
     def __init__(self, stages):
         self.stages = stages
 

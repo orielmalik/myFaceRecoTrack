@@ -2,31 +2,31 @@ from pydantic import BaseModel
 from typing import List
 from pydantic import BaseModel
 
+
 class FrameRequest(BaseModel):
     image: str
     name: str
 
+
 class MatchResponse(BaseModel):
     matched: bool
-    user_id: str | None
-    similarity: float
+    name: str
+
+
+from typing import List, Optional
+from pydantic import BaseModel, Field
+
 
 class DetectionWithPersonBoundary(BaseModel):
-
-    timestamp: str
-
-    x: float
-    y: float
-    width: float
-    height: float
-
-    jointNames: List[str]
-    jointXs: List[float]
-    jointYs: List[float]
-    jointConfidences: List[float]
-
-    faceVector: List[float]
-    faceConfidence: float
-
-    personName: str
-    personCreatedAt: str
+    x: Optional[float] = None
+    y: Optional[float] = None
+    width: Optional[float] = None
+    height: Optional[float] = None
+    matched: bool = False
+    jointNames: List[str] = Field(default_factory=list)
+    jointXs: List[float] = Field(default_factory=list)
+    jointYs: List[float] = Field(default_factory=list)
+    jointConfidences: List[float] = Field(default_factory=list)
+    personName: Optional[str] = None
+    faceVector: List[float] = Field(default_factory=list)
+    faceConfidence: float = 0.0
