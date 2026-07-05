@@ -1,27 +1,12 @@
 # Engine/FaceCore.py
-import numpy as np
-
 class FaceCore:
-
     def __init__(self, face_app):
         self.face_app = face_app
 
-    def get_embedding(self, image):
-        """
-        ONLY InsightFace -> returns vector
-        """
-
-        if image is None:
+    def get_embedding(self, image_bgr):
+        if image_bgr is None:
             return None
-
-        # InsightFace expects RGB
-        if hasattr(image, "shape"):
-            import cv2
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-        faces = self.face_app.get(image)
-
+        faces = self.face_app.get(image_bgr)
         if not faces:
             return None
-
         return faces[0].embedding

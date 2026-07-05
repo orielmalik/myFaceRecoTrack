@@ -1,6 +1,6 @@
 # Service/FaceService.py
 
-from Model.FaceModel import DetectionWithPersonBoundary
+from Model.BodyModel import DetectionWithPersonBoundary
 from Utils.Consts import ENDPOINT_DEV
 
 
@@ -10,15 +10,14 @@ class FaceService:
         self.api = api_client
         self.core = face_core
 
-    def identify_face(self, embedding, person_name=None):
+    async def identify_face(self, embedding, person_name=None):
 
         dto = DetectionWithPersonBoundary(
             personName=person_name,
             faceVector=embedding.tolist()
         )
 
-
-        return self.api.post(
+        return  await self.api.post(
             ENDPOINT_DEV,
             json=dto.model_dump()
         )

@@ -19,7 +19,6 @@ class FaceEngine:
         if isinstance(image, str):
 
             try:
-                # אם זה data URL
                 if "," in image:
                     image = image.split(",")[1]
 
